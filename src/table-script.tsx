@@ -19,9 +19,11 @@ import type { SourceDataType, TableDataType } from "./types";
 const tableData: TableDataType[] = (sourceData as unknown as SourceDataType[])
     .filter((dataRow) => dataRow.employees || dataRow.externals) // Filter out rows without employees or externals
     .map((dataRow, index) => {
-        let worker = dataRow.employees ? dataRow.employees : dataRow.externals; // simplify Data acces
+        const worker = dataRow.employees ? dataRow.employees : dataRow.externals; // simplify Data access
 
         const person = worker ? `${worker?.firstname} ${worker?.lastname}` : "NaN";
+        
+      //transfer numbers in percentages + if undefined return NaN
         const LastTwelveMonths = Number(worker?.workforceUtilisation?.utilisationRateLastTwelveMonths) * 100;
         const Y2D = Number(worker?.workforceUtilisation?.utilisationRateYearToDate) * 100;
         const june = Number(worker?.workforceUtilisation?.lastThreeMonthsIndividually?.find((e) => e.month === "June")?.utilisationRate) * 100;
