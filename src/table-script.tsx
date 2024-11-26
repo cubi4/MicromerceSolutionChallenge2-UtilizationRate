@@ -34,11 +34,11 @@ const tableData: TableDataType[] = (sourceData as unknown as SourceDataType[])
 
         const row: TableDataType = {
             person: `${person}`,
-            past12Months: `${LastTwelveMonths}%`,
-            y2d: `${Y2D}%`,
-            june: `${june}%`,
-            july: `${july}%`,
-            august: `${august}%`,
+            past12Months: `${LastTwelveMonths} %`,
+            y2d: `${Y2D} %`,
+            june: `${june} %`,
+            july: `${july} %`,
+            august: `${august} %`,
             netEarningsPrevMonth: `${netEarningsPrevMonth} EUR`,
         };
 
