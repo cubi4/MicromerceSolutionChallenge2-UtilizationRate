@@ -56,16 +56,16 @@ const Example = () => {
                 header: "Y2D",
             },
             {
-                accessorKey: "august",
-                header: "August",
-            },
-            {
                 accessorKey: "june",
                 header: "June",
             },
             {
-                accessorKey: "july",
-                header: "July",
+              accessorKey: "july",
+              header: "July",
+            },
+            {
+                accessorKey: "august",
+                header: "August",
             },
             {
                 accessorKey: "netEarningsPrevMonth",
