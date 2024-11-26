@@ -16,29 +16,32 @@ import type { SourceDataType, TableDataType } from "./types";
  * @prop {number} netEarningsPrevMonth - The net earnings for the previous month.
  */
 
-const tableData: TableDataType[] = (sourceData as unknown as SourceDataType[]).map((dataRow, index) => {
-    let worker = dataRow.employees || dataRow.externals || undefined;
-    const person = worker ? `${worker.firstname} ${worker.lastname}` : "Team";
-    const LastTwelveMonths = Number(worker?.workforceUtilisation?.utilisationRateLastTwelveMonths) * 100;
-    const Y2D = Number(worker?.workforceUtilisation?.utilisationRateYearToDate) * 100;
-    const august = Number(worker?.workforceUtilisation?.lastThreeMonthsIndividually?.find((e) => e.month === "August")?.utilisationRate) * 100;
-    const june = Number(worker?.workforceUtilisation?.lastThreeMonthsIndividually?.find((e) => e.month === "June")?.utilisationRate) * 100;
-    const july = Number(worker?.workforceUtilisation?.lastThreeMonthsIndividually?.find((e) => e.month === "July")?.utilisationRate) * 100;
+const tableData: TableDataType[] = (sourceData as unknown as SourceDataType[])
+    .filter((dataRow) => dataRow.employees || dataRow.externals) // Filter out rows without employees or externals
+    .map((dataRow, index) => {
+        let worker = dataRow.employees ? dataRow.employees : dataRow.externals; // simplify Data acces
 
-    const netEarningsPrevMonth = Number(worker?.workforceUtilisation?.monthlyCostDifference);
+        const person = worker ? `${worker?.firstname} ${worker?.lastname}` : "NaN";
+        const LastTwelveMonths = Number(worker?.workforceUtilisation?.utilisationRateLastTwelveMonths) * 100;
+        const Y2D = Number(worker?.workforceUtilisation?.utilisationRateYearToDate) * 100;
+        const june = Number(worker?.workforceUtilisation?.lastThreeMonthsIndividually?.find((e) => e.month === "June")?.utilisationRate) * 100;
+        const july = Number(worker?.workforceUtilisation?.lastThreeMonthsIndividually?.find((e) => e.month === "July")?.utilisationRate) * 100;
+        const august = Number(worker?.workforceUtilisation?.lastThreeMonthsIndividually?.find((e) => e.month === "August")?.utilisationRate) * 100;
 
-    const row: TableDataType = {
-        person: `${person}`,
-        past12Months: `${LastTwelveMonths}%`,
-        y2d: `${Y2D}%`,
-        june: `${june}%`,
-        july: `${july}%`,
-        august: `${august}%`,
-        netEarningsPrevMonth: `${netEarningsPrevMonth} EUR`,
-    };
+        const netEarningsPrevMonth = Number(worker?.workforceUtilisation?.monthlyCostDifference);
 
-    return row;
-});
+        const row: TableDataType = {
+            person: `${person}`,
+            past12Months: `${LastTwelveMonths}%`,
+            y2d: `${Y2D}%`,
+            june: `${june}%`,
+            july: `${july}%`,
+            august: `${august}%`,
+            netEarningsPrevMonth: `${netEarningsPrevMonth} EUR`,
+        };
+
+        return row;
+    });
 
 const Example = () => {
     const columns = useMemo<MRT_ColumnDef<TableDataType>[]>(
@@ -60,8 +63,8 @@ const Example = () => {
                 header: "June",
             },
             {
-              accessorKey: "july",
-              header: "July",
+                accessorKey: "july",
+                header: "July",
             },
             {
                 accessorKey: "august",
