@@ -131,7 +131,7 @@ export type TableDataType = {
   person: string;
   past12Months: string;
   y2d: string;
-  may: string;
+  august: string;
   june: string;
   july: string;
   netEarningsPrevMonth: string;

@@ -17,23 +17,24 @@ import type { SourceDataType, TableDataType } from "./types";
  */
 
 const tableData: TableDataType[] = (sourceData as unknown as SourceDataType[]).map((dataRow, index) => {
-    const person = `${dataRow?.employees?.firstname} ${dataRow?.employees?.lastname}`;
-    const LastTwelveMonths = dataRow?.employees?.workforceUtilisation?.utilisationRateLastTwelveMonths;
-    const Y2D = dataRow?.employees?.workforceUtilisation?.utilisationRateYearToDate;
-    const august = dataRow?.employees?.workforceUtilisation?.lastThreeMonthsIndividually?.filter((e) => e.month === "August")[0]?.utilisationRate;
-    const june = dataRow?.employees?.workforceUtilisation?.lastThreeMonthsIndividually?.filter((e) => e.month === "June")[0]?.utilisationRate;
-    const july = dataRow?.employees?.workforceUtilisation?.lastThreeMonthsIndividually?.filter((e) => e.month === "July")[0]?.utilisationRate;
+    let worker = dataRow.employees || dataRow.externals || undefined;
+    const person = worker ? `${worker.firstname} ${worker.lastname}` : "Team";
+    const LastTwelveMonths = Number(worker?.workforceUtilisation?.utilisationRateLastTwelveMonths) * 100;
+    const Y2D = Number(worker?.workforceUtilisation?.utilisationRateYearToDate) * 100;
+    const august = Number(worker?.workforceUtilisation?.lastThreeMonthsIndividually?.find((e) => e.month === "August")?.utilisationRate) * 100;
+    const june = Number(worker?.workforceUtilisation?.lastThreeMonthsIndividually?.find((e) => e.month === "June")?.utilisationRate) * 100;
+    const july = Number(worker?.workforceUtilisation?.lastThreeMonthsIndividually?.find((e) => e.month === "July")?.utilisationRate) * 100;
 
-    // const netEarningsPrevMonth = dataRow?.employees?.workforceUtilisation?.netEarningsPrevMonth;
+    const netEarningsPrevMonth = Number(worker?.workforceUtilisation?.monthlyCostDifference);
 
     const row: TableDataType = {
         person: `${person}`,
         past12Months: `${LastTwelveMonths}%`,
         y2d: `${Y2D}%`,
-        may: `${august}%`,
         june: `${june}%`,
         july: `${july}%`,
-        netEarningsPrevMonth: `netEarningsPrevMonth ${index} placeholder`,
+        august: `${august}%`,
+        netEarningsPrevMonth: `${netEarningsPrevMonth} EUR`,
     };
 
     return row;
@@ -55,8 +56,8 @@ const Example = () => {
                 header: "Y2D",
             },
             {
-                accessorKey: "may",
-                header: "May",
+                accessorKey: "august",
+                header: "August",
             },
             {
                 accessorKey: "june",
