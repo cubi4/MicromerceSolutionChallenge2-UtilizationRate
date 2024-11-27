@@ -22,16 +22,50 @@ const tableData: TableDataType[] = (sourceData as unknown as SourceDataType[])
         const worker = dataRow.employees ? dataRow.employees : dataRow.externals; // simplify Data access
 
         const person = worker ? `${worker?.firstname} ${worker?.lastname}` : "NaN";
-        
-      //transfer numbers in percentages + if undefined return NaN
+
+        //transfer numbers in percentages + if undefined return NaN
         const LastTwelveMonths = Number(worker?.workforceUtilisation?.utilisationRateLastTwelveMonths) * 100;
         const Y2D = Number(worker?.workforceUtilisation?.utilisationRateYearToDate) * 100;
-        const june = Number(worker?.workforceUtilisation?.lastThreeMonthsIndividually?.find((e) => e.month === "June")?.utilisationRate) * 100;
-        const july = Number(worker?.workforceUtilisation?.lastThreeMonthsIndividually?.find((e) => e.month === "July")?.utilisationRate) * 100;
-        const august = Number(worker?.workforceUtilisation?.lastThreeMonthsIndividually?.find((e) => e.month === "August")?.utilisationRate) * 100;
+        const june = Number(worker?.workforceUtilisation?.lastThreeMonthsIndividually?.[2]?.utilisationRate) * 100;
+        const july = Number(worker?.workforceUtilisation?.lastThreeMonthsIndividually?.[1]?.utilisationRate) * 100;
+        const august = Number(worker?.workforceUtilisation?.lastThreeMonthsIndividually?.[0]?.utilisationRate) * 100;
 
-        const netEarningsPrevMonth = Number(worker?.workforceUtilisation?.monthlyCostDifference);
+        const getPreviousMonth = (): string => {
+            const today = new Date();
+            const previousMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+            const year = previousMonth.getFullYear();
+            const month = String(previousMonth.getMonth() + 1).padStart(2, "0"); // format Month to 2 digits
+            return `${year}-${month}`;
+        };
 
+        const validateDate = (): boolean => {
+            const end = worker?.costsByMonth?.periods?.[worker.costsByMonth.periods.length - 1]?.end
+                ? new Date(worker.costsByMonth.periods[worker.costsByMonth.periods.length - 1].end)
+                : false;
+            console.log(end);
+            console.log(end >= new Date(getPreviousMonth()));
+            return end >= new Date(getPreviousMonth()) || end === null ? true : false;
+        };
+
+        const previousMonth = getPreviousMonth();
+        //--------Calculation netEarningsPrevMonth--------
+        // Idea: NetEarningsPrevMonth = potentialearningsByMonth - monthlySalary
+        let validNetEarningsPrevMonth: number;
+        //check if external or employee
+        if (dataRow.externals != undefined) {
+            const monthlySalary =
+                worker?.costsByMonth?.periods?.[worker.costsByMonth.periods.length - 1]?.monthlySalary && validateDate()
+                    ? worker?.costsByMonth?.periods?.[worker.costsByMonth.periods.length - 1]?.monthlySalary
+                    : 0;
+            const previousMonthData = worker?.costsByMonth?.costsByMonth?.find((monthData) => monthData.month === previousMonth)?.costs ?? 0;
+            validNetEarningsPrevMonth = Number(previousMonthData) - Number(monthlySalary);
+        } else {
+            const EarningsLastMonth =
+                worker?.costsByMonth?.potentialEarningsByMonth?.find((monthData) => monthData.month === previousMonth)?.costs ?? 0;
+            const monthlySalary = worker?.statusAggregation?.monthlySalary ?? 0;
+            const netEarningsPrevMonth = EarningsLastMonth ? Number(EarningsLastMonth) - Number(monthlySalary) : Number(EarningsLastMonth);
+            validNetEarningsPrevMonth = isNaN(netEarningsPrevMonth) ? 0 : netEarningsPrevMonth;
+        }
         const row: TableDataType = {
             person: `${person}`,
             past12Months: `${LastTwelveMonths} %`,
@@ -39,7 +73,7 @@ const tableData: TableDataType[] = (sourceData as unknown as SourceDataType[])
             june: `${june} %`,
             july: `${july} %`,
             august: `${august} %`,
-            netEarningsPrevMonth: `${netEarningsPrevMonth} EUR`,
+            netEarningsPrevMonth: `${validNetEarningsPrevMonth} EUR`,
         };
 
         return row;
