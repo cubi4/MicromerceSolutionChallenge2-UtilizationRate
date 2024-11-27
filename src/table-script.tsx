@@ -22,7 +22,6 @@ const tableData: TableDataType[] = (sourceData as unknown as SourceDataType[])
         const worker = dataRow.employees ? dataRow.employees : dataRow.externals; // simplify Data access
 
         const person = worker ? `${worker?.firstname} ${worker?.lastname}` : "NaN";
-
         //transfer numbers in percentages + if undefined return NaN
         const LastTwelveMonths = Number(worker?.workforceUtilisation?.utilisationRateLastTwelveMonths) * 100;
         const Y2D = Number(worker?.workforceUtilisation?.utilisationRateYearToDate) * 100;
@@ -43,11 +42,7 @@ const tableData: TableDataType[] = (sourceData as unknown as SourceDataType[])
             const end = worker?.costsByMonth?.periods?.[worker.costsByMonth.periods.length - 1]?.end;
             if (end === "null") return true;
             if (end === undefined || end === null) return false;
-            // console.log(end);
             const endDate = new Date(end);
-            // console.log(endDate);
-            // console.log(new Date(getPreviousMonth()));
-            // console.log(endDate >= new Date(getPreviousMonth()));
             return endDate >= new Date(getPreviousMonth()) ? true : false;
         };
 
@@ -65,10 +60,6 @@ const tableData: TableDataType[] = (sourceData as unknown as SourceDataType[])
                 worker?.costsByMonth?.periods?.[worker.costsByMonth.periods.length - 1]?.monthlySalary && validateDate()
                     ? worker?.costsByMonth?.periods?.[worker.costsByMonth.periods.length - 1]?.monthlySalary
                     : 0;
-            /* ALTERNATIVE Calc: 
-            const previousMonthData = worker?.costsByMonth?.costsByMonth?.find((monthData) => monthData.month === previousMonth)?.costs ?? 0;
-            validNetEarningsPrevMonth = Number(previousMonthData) - Number(monthlySalary); 
-            */
             validNetEarningsPrevMonth = -Number(monthlySalary).toFixed(2);
         } else {
             //employees
@@ -82,8 +73,9 @@ const tableData: TableDataType[] = (sourceData as unknown as SourceDataType[])
             validNetEarningsPrevMonth = Number(netEarningsPrevMonth.toFixed(2));
         }
 
-        //IDEA 2: netEarningsPrevMonth = TotalCost Per Customer
-        const netEarningsPrevMonth = worker?.workforceUtilisation?.totalCostPerCustomer;
+        //IDEA 2: netEarningsPrevMonth = monthlyCostDifference
+        const netEarningsPrevMonth = worker?.workforceUtilisation?.monthlyCostDifference;
+
         const row: TableDataType = {
             person: `${person}`,
             past12Months: `${LastTwelveMonths} %`,
@@ -91,7 +83,7 @@ const tableData: TableDataType[] = (sourceData as unknown as SourceDataType[])
             june: `${june} %`,
             july: `${july} %`,
             august: `${august} %`,
-            netEarningsPrevMonth: `${netEarningsPrevMonth} EUR`,
+            netEarningsPrevMonth: `${validNetEarningsPrevMonth} EUR`,
         };
 
         return row;
