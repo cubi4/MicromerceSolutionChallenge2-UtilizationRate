@@ -10,7 +10,7 @@ import type { SourceDataType, TableDataType } from "./types";
  * @prop {string} person - The full name of the employee.
  * @prop {number} past12Months - The value for the past 12 months.
  * @prop {number} y2d - The year-to-date value.
- * @prop {number} may - The value for May.
+ * @prop {number} august - The value for May.
  * @prop {number} june - The value for June.
  * @prop {number} july - The value for July.
  * @prop {number} netEarningsPrevMonth - The net earnings for the previous month.
@@ -30,6 +30,7 @@ const tableData: TableDataType[] = (sourceData as unknown as SourceDataType[])
         const july = Number(worker?.workforceUtilisation?.lastThreeMonthsIndividually?.[1]?.utilisationRate) * 100;
         const august = Number(worker?.workforceUtilisation?.lastThreeMonthsIndividually?.[0]?.utilisationRate) * 100;
 
+        //------------------------functions------------------------
         const getPreviousMonth = (): string => {
             const today = new Date();
             const previousMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
@@ -39,33 +40,50 @@ const tableData: TableDataType[] = (sourceData as unknown as SourceDataType[])
         };
 
         const validateDate = (): boolean => {
-            const end = worker?.costsByMonth?.periods?.[worker.costsByMonth.periods.length - 1]?.end
-                ? new Date(worker.costsByMonth.periods[worker.costsByMonth.periods.length - 1].end)
-                : false;
-            console.log(end);
-            console.log(end >= new Date(getPreviousMonth()));
-            return end >= new Date(getPreviousMonth()) || end === null ? true : false;
+            const end = worker?.costsByMonth?.periods?.[worker.costsByMonth.periods.length - 1]?.end;
+            if (end === "null") return true;
+            if (end === undefined || end === null) return false;
+            // console.log(end);
+            const endDate = new Date(end);
+            // console.log(endDate);
+            // console.log(new Date(getPreviousMonth()));
+            // console.log(endDate >= new Date(getPreviousMonth()));
+            return endDate >= new Date(getPreviousMonth()) ? true : false;
         };
 
+        //------------------------Calculation netEarningsPrevMonth------------------------
+
+        /* IDEA 1: 
+        externals: NetEarningsPrevMonth = -monthlySalary
+        employees: NetEarningsPrevMonth = potentialearningsByMonth - monthlySalary
+        */
         const previousMonth = getPreviousMonth();
-        //--------Calculation netEarningsPrevMonth--------
-        // Idea: NetEarningsPrevMonth = potentialearningsByMonth - monthlySalary
         let validNetEarningsPrevMonth: number;
-        //check if external or employee
         if (dataRow.externals != undefined) {
+            //externals
             const monthlySalary =
                 worker?.costsByMonth?.periods?.[worker.costsByMonth.periods.length - 1]?.monthlySalary && validateDate()
                     ? worker?.costsByMonth?.periods?.[worker.costsByMonth.periods.length - 1]?.monthlySalary
                     : 0;
+            /* ALTERNATIVE Calc: 
             const previousMonthData = worker?.costsByMonth?.costsByMonth?.find((monthData) => monthData.month === previousMonth)?.costs ?? 0;
-            validNetEarningsPrevMonth = Number(previousMonthData) - Number(monthlySalary);
+            validNetEarningsPrevMonth = Number(previousMonthData) - Number(monthlySalary); 
+            */
+            validNetEarningsPrevMonth = -Number(monthlySalary).toFixed(2);
         } else {
+            //employees
             const EarningsLastMonth =
                 worker?.costsByMonth?.potentialEarningsByMonth?.find((monthData) => monthData.month === previousMonth)?.costs ?? 0;
-            const monthlySalary = worker?.statusAggregation?.monthlySalary ?? 0;
-            const netEarningsPrevMonth = EarningsLastMonth ? Number(EarningsLastMonth) - Number(monthlySalary) : Number(EarningsLastMonth);
-            validNetEarningsPrevMonth = isNaN(netEarningsPrevMonth) ? 0 : netEarningsPrevMonth;
+            const monthlySalary =
+                worker?.costsByMonth?.periods?.[worker.costsByMonth.periods.length - 1]?.monthlySalary && validateDate()
+                    ? worker?.costsByMonth?.periods?.[worker.costsByMonth.periods.length - 1]?.monthlySalary
+                    : 0;
+            const netEarningsPrevMonth = Number(EarningsLastMonth) - Number(monthlySalary);
+            validNetEarningsPrevMonth = Number(netEarningsPrevMonth.toFixed(2));
         }
+
+        //IDEA 2: netEarningsPrevMonth = TotalCost Per Customer
+        const netEarningsPrevMonth = worker?.workforceUtilisation?.totalCostPerCustomer;
         const row: TableDataType = {
             person: `${person}`,
             past12Months: `${LastTwelveMonths} %`,
@@ -73,7 +91,7 @@ const tableData: TableDataType[] = (sourceData as unknown as SourceDataType[])
             june: `${june} %`,
             july: `${july} %`,
             august: `${august} %`,
-            netEarningsPrevMonth: `${validNetEarningsPrevMonth} EUR`,
+            netEarningsPrevMonth: `${netEarningsPrevMonth} EUR`,
         };
 
         return row;

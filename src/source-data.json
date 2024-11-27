@@ -1385,7 +1385,7 @@
                 "_createdDate": "1713202714363",
                 "_applicationId": "bbabea28-87a2-4439-bf36-53922115729c",
                 "periods": [
-                    { "monthlySalary": "5918.181818181818", "start": "2024-04-01", "end": "2024-07-17", "hourlyRate": "50.0", "timeBudget": "420.0" }
+                    { "monthlySalary": "5918.181818181818", "start": "2024-04-01", "end": "2024-12-17", "hourlyRate": "50.0", "timeBudget": "420.0" }
                 ],
                 "costsByMonth": [
                     { "costs": "0", "month": "2023-01" },
@@ -1409,7 +1409,7 @@
                     { "costs": "3345", "month": "2024-07" },
                     { "costs": "0", "month": "2024-08" },
                     { "costs": "0", "month": "2024-09" },
-                    { "costs": "0", "month": "2024-10" },
+                    { "costs": "1000", "month": "2024-10" },
                     { "costs": "0", "month": "2024-11" },
                     { "costs": "0", "month": "2024-12" },
                     { "costs": "0", "month": "2025-01" },
