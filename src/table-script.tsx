@@ -31,7 +31,8 @@ const tableData: TableDataType[] = (sourceData as unknown as SourceDataType[])
         const august = Number(worker?.workforceUtilisation?.lastThreeMonthsIndividually?.[0]?.utilisationRate) * 100;
 
         //------------------------functions------------------------
-        const getPreviousMonth = (): string => {
+      const getPreviousMonth = (): string => {
+          //returns previousMonth in "YYYY-MM"
             const today = new Date();
             const previousMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
             const year = previousMonth.getFullYear();
@@ -39,7 +40,8 @@ const tableData: TableDataType[] = (sourceData as unknown as SourceDataType[])
             return `${year}-${month}`;
         };
 
-        const validateWorkTime = (): boolean => {
+      const validateWorkTime = (): boolean => {
+          //checks if worker was still working in previous Month
             const end = worker?.costsByMonth?.periods?.[worker.costsByMonth.periods.length - 1]?.end;
             if (end === "null") return true;
             if (end === undefined || end === null) return false;
@@ -76,8 +78,8 @@ const tableData: TableDataType[] = (sourceData as unknown as SourceDataType[])
 
         /*--------IDEA 2:-------- 
         netEarningsPrevMonth = monthlyCostDifference
-         */
         const netEarningsPrevMonth = worker?.workforceUtilisation?.monthlyCostDifference;
+        */
 
         const row: TableDataType = {
             person: `${person}`,
